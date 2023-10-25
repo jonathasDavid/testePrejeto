@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Server {
     private static final int PORT = 12345;
@@ -62,11 +65,18 @@ public class Server {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                  PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-                int score = 0;
+                List<Integer> questionIndexes = new ArrayList<>();
                 for (int i = 0; i < QUESTIONS.length; i++) {
-                    out.println(QUESTIONS[i]);
+                    questionIndexes.add(i);
+                }
+                Collections.shuffle(questionIndexes);  // Embaralhar os índices das perguntas
+
+                int score = 0;
+                for (int i = 0; i < questionIndexes.size() && i < 10; i++) {  // Limitar a 10 perguntas
+                    int questionIndex = questionIndexes.get(i);
+                    out.println(QUESTIONS[questionIndex]);
                     String clientResponse = in.readLine();
-                    if (clientResponse != null && clientResponse.toLowerCase().equals(ANSWERS[i].toLowerCase())) {
+                    if (clientResponse != null && clientResponse.toLowerCase().equals(ANSWERS[questionIndex].toLowerCase())) {
                         score++;
                     }
                 }
