@@ -11,14 +11,29 @@ public class Server {
     private static final int PORT = 12345;
     private static final String[] QUESTIONS = {
             "Em que filme, um jovem se apaixona por uma mulher mais velha que é sua vizinha e inicia um caso proibido??",
-            "Qual é a capital da França?",
-            "Quem escreveu 'Romeu e Julieta'?",
+            "Qual é o filme que explora a história de um romance entre um músico e uma imigrante que compartilham uma paixão pela música?",
+            "Em que filme, um escritor contrata uma prostituta para acompanhá-lo em eventos sociais e acaba se apaixonando por ela?",
+            "Qual é o filme que narra a história de um jovem casal que se apaixona em meio à guerra e à ocupação nazista?",
+            "Em que filme, um músico de jazz e uma atriz se apaixonam em Los Angeles, enquanto perseguem seus sonhos na cidade?",
+            "Qual filme explora um romance que se desenvolve ao longo de várias décadas e épocas diferentes, destacando a imortalidade do amor?",
+            "Em que filme, um casal se apaixona durante um cruzeiro, mas o romance enfrenta desafios quando eles retornam à vida real?",
+            "Qual é o filme que apresenta uma história de amor entre um inventor excêntrico e uma artista, com a Torre Eiffel como pano de fundo?",
+            "Em que filme, um jovem casal enfrenta um dilema quando o rapaz é diagnosticado com câncer terminal, desafiando seu amor?",
+            "Qual filme segue a jornada de um músico famoso que se apaixona por uma mulher que não pode ouvir sua música devido à surdez?"
+
             // Adicione mais perguntas conforme necessário
     };
     private static final String[] ANSWERS = {
             "O Graduado",
-            "paris",
-            "william shakespeare"
+            "Apenas uma Vez",
+            "Uma Linda Mulher",
+            "Casablanca",
+            "La La Land",
+            "Te Amarei para Sempre",
+            "Titanic",
+            "Hugo",
+            "Um Amor para Recordar",
+            "Amor Sublime Amor"
             // Adicione mais respostas correspondentes às perguntas (em minúsculas)
     };
 
