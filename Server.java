@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Server {
+import static java.lang.System.out;
+
+public class ServerTeste {
     private static final int PORT = 12345;
     private static final String[] QUESTIONS = {
-            "Em que filme, um jovem se apaixona por uma mulher mais velha que é sua vizinha e inicia um caso proibido??",
+            "Em que filme, um jovem se apaixona por uma mulher mais velha que é sua vizinha e inicia um caso proibido?",
             "Qual é o filme que explora a história de um romance entre um músico e uma imigrante que compartilham uma paixão pela música?",
             "Em que filme, um escritor contrata uma prostituta para acompanhá-lo em eventos sociais e acaba se apaixonando por ela?",
             "Qual é o filme que narra a história de um jovem casal que se apaixona em meio à guerra e à ocupação nazista?",
@@ -40,13 +42,52 @@ public class Server {
             // Adicione mais respostas correspondentes às perguntas (em minúsculas)
     };
 
+    private static final String COMMAND_HELP = "#help";
+    private static final String COMMAND_START = "#iniciar";
+    private static final String COMMAND_EXIT = "#sair";
+
+    private static final String COMMAND_DISCONECT = "#disconect";
+
+    private static List<PrintWriter> clients = Collections.synchronizedList(new ArrayList<>());
+
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Server is listening on port " + PORT);
+            out.println("Server is listening on port " + PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Accepted connection from client: " + clientSocket.getInetAddress().getHostAddress());
-                new ClientHandler(clientSocket).start();
+                out.println("Accepted connection from client: " + clientSocket.getInetAddress().getHostAddress());
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                clients.add(out);
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                    String clientInputt = in.readLine();
+                    if (COMMAND_START.equals(clientInputt)) {
+                        new ClientHandler(clientSocket, out).start();
+                    } else if (COMMAND_EXIT.equals(clientInputt)) {
+                        out.println("Você escolheu sair. Desconectando...");
+                        out.close();
+                        in.close();
+                        clientSocket.close();
+                        break;
+                    }else if (COMMAND_HELP.equals(clientInputt)) {
+                        out.println("Comandos disponíveis: " + COMMAND_START + ", " + COMMAND_EXIT + ", " + COMMAND_HELP);
+                        String clienteInputeDois = in.readLine();
+                        if(clienteInputeDois.equals(COMMAND_START)){
+                            new ClientHandler(clientSocket, out).start();
+                            break;
+                        }
+                    }else if (COMMAND_EXIT.equals(clientInputt)) {
+                        out.println("Você escolheu sair. Desconectando...");
+                        out.close();
+                        in.close();
+                        clientSocket.close();
+                        break;
+                    }
+
+                    else {
+                        out.println("Comando inválido. Digite " + COMMAND_HELP + " para ver a lista de comandos.");
+                    }
 
             }
         } catch (IOException e) {
@@ -54,40 +95,42 @@ public class Server {
         }
     }
 
+
     private static class ClientHandler extends Thread {
         private Socket clientSocket;
+        private PrintWriter clientOut;
 
-        public ClientHandler(Socket socket) {
+        public ClientHandler(Socket socket, PrintWriter out) {
             this.clientSocket = socket;
+            this.clientOut = out;
         }
 
         public void run() {
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-
-                List<Integer> questionIndexes = new ArrayList<>();
-                for (int i = 0; i < QUESTIONS.length; i++) {
-                    questionIndexes.add(i);
-                }
-                Collections.shuffle(questionIndexes);  // Embaralhar os índices das perguntas
-
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
                 int score = 0;
-                for (int i = 0; i < questionIndexes.size() && i < 10; i++) {  // Limitar a 10 perguntas
-                    int questionIndex = questionIndexes.get(i);
-                    out.println(QUESTIONS[questionIndex]);
+                for (int i = 0; i < QUESTIONS.length; i++) {
+                    clientOut.println(QUESTIONS[i]);
                     String clientResponse = in.readLine();
-                    if (clientResponse != null && clientResponse.toLowerCase().equals(ANSWERS[questionIndex].toLowerCase())) {
+                    if (clientResponse != null && clientResponse.toLowerCase().equals(ANSWERS[i].toLowerCase())) {
                         score++;
                     }
                 }
 
-                out.println("Você acertou " + score + " perguntas!");
-                clientSocket.close();
+                clientOut.println("Você acertou " + score + " perguntas!");
+                clientOut.println("Digite '" + COMMAND_START + "' para jogar novamente ou '" + COMMAND_EXIT + "' para sair.");
+
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                clients.remove(clientOut);
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                out.println("Connection closed for client: " + clientSocket.getInetAddress().getHostAddress());
             }
         }
     }
+
 }
-
-
